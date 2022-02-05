@@ -61,20 +61,20 @@ $Files = Get-ChildItem -Path $FilesLocal -Force -Recurse
 ForEach ($File in $Files)
 {Add-PnPFile -Path "$($File.Directory)\$($File.Name)" -Folder $Library }
 
-# FILE CLEAN UP 
+#FILE CLEAN UP 
 Remove-Item -Path "C:\Logs\Compliance\iPad\$((Get-Date).ToString("dd-MM-yyyy"))_iPad-LostMode.csv"
 
 #-------------------------------------------------------#
 # LOCK NONCOMPLIANT USERS VIA GRAPH API
 foreach ($device in $nonCompliant)
 {   
-    #Get MEM device ID
+    #GET AND SPLIT DEVICE ID
     $id = ($device.id).ToString().split("_")
     $UID = $id.GetValue(2)
     $URL="https://graph.microsoft.com/beta/deviceManagement/managedDevices/$UID/enableLostMode"
             $BodyJson = @"
             {
-                "message": "The security system has identified that your Device no longer meets our security requirements. Please contact the IT to unlock your device."
+                "message": "The Company Security System has identified that your Device no longer meets our security requirements. Please contact the IT to unlock your device."
                 "footer": "COMPANY NAME"
             }
 "@
@@ -82,7 +82,7 @@ foreach ($device in $nonCompliant)
     Invoke-MSGraphRequest -HttpMethod POST -Url $URL -Content $BodyJson
 }
 #-------------------------------------------------------#
-#REMOVE USER ASSIGNED PASSCODE TO ENSURE KEYCHAIN DOES NOT LOCKOUT
+#REMOVE USER PASSCODE TO ENSURE KEYCHAIN DOES NOT LOCKOUT
 foreach ($device in $nonCompliant)
 {
     $RemovePasscode = "https://graph.microsoft.com/beta/deviceManagement/managedDevices/$UID/resetPasscode"
