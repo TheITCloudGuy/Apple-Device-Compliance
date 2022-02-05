@@ -13,10 +13,10 @@
 
 
 .NOTES
-    Version:          1.0
+    Version:          1.4
     Author:           Stephen Devlin
     Creation Date:    22.10.21
-    Purpose/Change:   Initial script development
+    Purpose/Change:   Addition of passkey removal.
                      
 #>
 # AZURE GRAPH API AUTHENTICATION
@@ -39,9 +39,10 @@ Connect-MSGraph -ClientSecret $ClientSecret -Quiet
 Update-MSGraphEnvironment -SchemaVersion 'beta'
 Connect-MSGraph -ClientSecret $ClientSecret -Quiet
 
-
 $ComplaincePolicyID = "Your Complaince Policy ID"
 $Devices = Get-DeviceManagement_DeviceCompliancePolicies_DeviceStatuses -deviceCompliancePolicyId $ComplaincePolicyID
+
+# FILTER NONCOMLIANT DEVICES TO REMOVE THOSE IN GRACE PERIOD
 $nonCompliant = $Devices | Where-Object {($_.status -eq "noncompliant" -and ($_.complianceGracePeriodExpirationDateTime -lt $currentDate))}
 
 # OUTPUT NON COMPLIANT DEVICES TO CSV
@@ -60,7 +61,6 @@ $Files = Get-ChildItem -Path $FilesLocal -Force -Recurse
 ForEach ($File in $Files)
 {Add-PnPFile -Path "$($File.Directory)\$($File.Name)" -Folder $Library }
 
-#-------------------------------------------------------#
 # FILE CLEAN UP 
 Remove-Item -Path "C:\Logs\Compliance\iPad\$((Get-Date).ToString("dd-MM-yyyy"))_iPad-LostMode.csv"
 
